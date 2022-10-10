@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 // import 'package:file/file.dart';
 // import 'package:file/local.dart';
 // import 'package:file/memory.dart';
@@ -80,36 +81,45 @@ class _MyHomePageState extends State<MyHomePage> {
         alignment: Alignment.center,
         padding: const EdgeInsets.all(8),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             fileList.isEmpty
                 ? const Text("백업할 대상이 없습니다.")
-                : ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: fileList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Text(
-                        fileList[index].toString(),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black87,
-                        ),
-                      );
-                    },
-                    separatorBuilder: (BuildContext context, int index) => const Divider(),
+                : Expanded(
+                    child: ListView.separated(
+                      // shrinkWrap: true,
+                      itemCount: fileList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Text(
+                          fileList[index].toString(),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black87,
+                          ),
+                        );
+                      },
+                      separatorBuilder: (BuildContext context, int index) => const Divider(),
+                    ),
                   ),
             fileList.isEmpty ? Container() : const Divider(),
             infoList.isEmpty
                 ? Container()
-                : ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: infoList.length,
-                    itemBuilder: (_, ii) {
-                      return Text(
-                        infoList[ii].toString(),
-                        style: const TextStyle(color: Colors.red),
-                      );
-                    },
-                    separatorBuilder: (BuildContext context, int index) => const Divider(),
+                : Expanded(
+                    child: ListView.separated(
+                      // shrinkWrap: true,
+                      itemCount: infoList.length,
+                      itemBuilder: (_, ii) {
+                        return Text(
+                          infoList[ii].toString(),
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 16,
+                          ),
+                        );
+                      },
+                      separatorBuilder: (BuildContext context, int index) => const Divider(),
+                    ),
                   ),
           ],
         ),
@@ -130,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
           .then((value) async => await file.delete())
           .then((value) => setState(() {
                 infoList.add("$temp is Deleted");
-                if(temp == fileList.last){
+                if (temp == fileList.last) {
                   infoList.add("COMPLETE!!!");
                 }
               }));
