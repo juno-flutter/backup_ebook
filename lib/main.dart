@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // import 'package:file/file.dart';
@@ -30,6 +31,8 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
+  get value => null;
+
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
@@ -48,6 +51,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<String> fileList = [];
   List<String> infoList = [];
+
+  final ScrollController _controller = ScrollController();
 
   @override
   void initState() {
@@ -87,38 +92,32 @@ class _MyHomePageState extends State<MyHomePage> {
             fileList.isEmpty
                 ? const Text("백업할 대상이 없습니다.")
                 : Expanded(
-                    child: ListView.separated(
-                      // shrinkWrap: true,
-                      itemCount: fileList.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Text(
-                          fileList[index].toString(),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black87,
-                          ),
-                        );
-                      },
-                      separatorBuilder: (BuildContext context, int index) => const Divider(),
-                    ),
-                  ),
-            fileList.isEmpty ? Container() : const Divider(),
-            infoList.isEmpty
-                ? Container()
-                : Expanded(
-                    child: ListView.separated(
-                      // shrinkWrap: true,
-                      itemCount: infoList.length,
-                      itemBuilder: (_, ii) {
-                        return Text(
-                          infoList[ii].toString(),
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 16,
-                          ),
-                        );
-                      },
-                      separatorBuilder: (BuildContext context, int index) => const Divider(),
+                    child: Scrollbar(
+                      controller: _controller,
+                      thumbVisibility: true,
+                      child: ListView.separated(
+                        controller: _controller,
+                        itemCount: fileList.length + infoList.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          if (infoList.length > index) {
+                            return Text(
+                              infoList[index].toString(),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.red,
+                              ),
+                            );
+                          }
+                          if (infoList.length <= index) {
+                            return Text(fileList[index-infoList.length].toString(), style: const TextStyle(fontSize: 16, color: Colors.black87));
+                          }
+
+                          return const Divider();
+                        },
+                        separatorBuilder: (BuildContext context, int index) {
+                          return const Divider();
+                        },
+                      ),
                     ),
                   ),
           ],
@@ -127,24 +126,31 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  // void _scroll2Bottom() {
+  //   _controller.jumpTo(_controller.position.maxScrollExtent);
+  // }
+
   void subCopy() {
     copyReservedFile();
   }
 
   Future<void> copyReservedFile() async {
-    for (var temp in fileList) {
+    for (var temp in fileList.reversed) {
       io.File file = io.File("$pathOrigin/$temp");
       await file
           .copy("$pathDest1/$temp")
           .then((value) async => await file.copy("$pathDest2/$temp"))
           .then((value) async => await file.delete())
           .then((value) => setState(() {
-                infoList.add("$temp is Deleted");
-                if (temp == fileList.last) {
-                  infoList.add("COMPLETE!!!");
+                infoList.insert(0, "$temp is Deleted");
+                if (temp == fileList.first) {
+                  infoList.insert(0, "COMPLETE!!!");
                 }
               }));
-      print("Delete: $pathOrigin/$temp");
+
+      if (kDebugMode) {
+        print("Delete: $pathOrigin/$temp");
+      }
     }
   }
 }
